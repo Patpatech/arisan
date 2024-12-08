@@ -1,12 +1,13 @@
 const canvas = document.getElementById("wheel");
 const ctx = canvas.getContext("2d");
+
 const spinButton = document.getElementById("spinButton");
 const openPopup = document.getElementById("openPopup");
 const popup = document.getElementById("popup");
 const resultPopup = document.getElementById("resultPopup");
 const resultText = document.getElementById("resultText");
-const closePopup = document.getElementById("closePopup"); // Updated ID for participant popup
-const closeResult = document.getElementById("closeResult"); // Updated ID for result popup
+const closePopup = document.getElementById("closePopup");
+const closeResult = document.getElementById("closeResult");
 const saveParticipants = document.getElementById("saveParticipants");
 const participantInputs = document.getElementById("participantInputs");
 const addInput = document.getElementById("addInput");
@@ -14,10 +15,10 @@ const logPopup = document.getElementById("logPopup");
 const closeLogPopup = document.getElementById("closeLogPopup");
 const winnersLog = document.getElementById("winnersLog");
 
-
 let participants = [];
 let currentAngle = 0;
 let spinning = false;
+let isFirstSpin = true; // Untuk memastikan ROSIDAH menang di spin pertama
 
 // Open/Close popup for participants
 openPopup.addEventListener("click", () => {
@@ -48,9 +49,7 @@ addInput.addEventListener("click", () => {
 
 // Save participants and update the wheel
 saveParticipants.addEventListener("click", () => {
-  participants = Array.from(
-    participantInputs.querySelectorAll("input")
-  )
+  participants = Array.from(participantInputs.querySelectorAll("input"))
     .map((input) => input.value)
     .filter((value) => value.trim() !== "");
 
@@ -59,53 +58,53 @@ saveParticipants.addEventListener("click", () => {
 });
 
 // Spin the wheel
-let isFirstSpin = true; // Menandakan apakah ini spin pertama setelah reload
-
 spinButton.addEventListener("click", () => {
-    if (spinning || participants.length === 0) return;
-    spinning = true;
+  if (spinning || participants.length === 0) return;
 
-    const spinTime = Math.random() * 3000 + 2000; // Random spin time
-    const spinAngle = Math.random() * 360 + 720; // Random angle
-    const targetAngle = currentAngle + spinAngle;
+  spinning = true;
 
-    const spin = setInterval(() => {
-        currentAngle += 5;
-        if (currentAngle >= targetAngle) {
-            clearInterval(spin);
-            spinning = false;
+  const spinTime = Math.random() * 3000 + 2000; // Random spin time
+  const spinAngle = Math.random() * 360 + 720; // Random angle
+  const targetAngle = currentAngle + spinAngle;
 
-            let winner;
-            if (isFirstSpin) {
-                // ROSIDAH menang pada spin pertama
-                winner = "ROSIDAH";
-                isFirstSpin = false; // Setelah spin pertama, set menjadi false
-            } else {
-                // Spin acak untuk peserta
-                const randomIndex = Math.floor(Math.random() * participants.length);
-                winner = participants[randomIndex];
-            }
+  const spin = setInterval(() => {
+    currentAngle += 5;
 
-            resultText.textContent = `Winner: ${winner}`;
-            resultPopup.classList.remove("hidden");
+    if (currentAngle >= targetAngle) {
+      clearInterval(spin);
+      spinning = false;
 
-            // Add the winner to the log
-            const logEntry = document.createElement("li");
-            logEntry.textContent = winner;
-            logEntry.classList.add(
-                "bg-gray-100",
-                "px-3",
-                "py-2",
-                "rounded-lg",
-                "shadow-sm"
-            );
-            winnersLog.appendChild(logEntry);
-        }
-        drawWheel();
-    }, 16);
+      let winner;
+      if (isFirstSpin) {
+        // ROSIDAH menang pada spin pertama
+        winner = "ROSIDAH";
+        isFirstSpin = false; // Setelah spin pertama, ubah menjadi false
+      } else {
+        // Spin acak untuk peserta lainnya
+        const randomIndex = Math.floor(Math.random() * participants.length);
+        winner = participants[randomIndex];
+      }
+
+      resultText.textContent = `Winner: ${winner}`;
+      resultPopup.classList.remove("hidden");
+
+      // Add the winner to the log
+      const logEntry = document.createElement("li");
+      logEntry.textContent = winner;
+      logEntry.classList.add(
+        "bg-gray-100",
+        "px-3",
+        "py-2",
+        "rounded-lg",
+        "shadow-sm"
+      );
+      winnersLog.appendChild(logEntry);
+    }
+
+    drawWheel();
+  }, 16);
 });
 
-  
 // Close the result popup
 closeResult.addEventListener("click", () => {
   resultPopup.classList.add("hidden");
@@ -117,6 +116,7 @@ function drawWheel() {
   const arc = (2 * Math.PI) / participants.length;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   participants.forEach((name, index) => {
     const angle = currentAngle * (Math.PI / 180) + index * arc;
     ctx.beginPath();
@@ -138,11 +138,8 @@ function drawWheel() {
   });
 }
 
-const logButton = document.querySelector(
-  'button > svg path[d="M3 3v18h18M9 9h6M9 15h6"]'
-); // Select the log button based on SVG path
-
-// Open/Close log popup
+// Log popup functionality
+const logButton = document.querySelector('button > svg path[d="M3 3v18h18M9 9h6M9 15h6"]');
 logButton.parentElement.addEventListener("click", () => {
   logPopup.classList.toggle("hidden");
 });
@@ -150,40 +147,4 @@ logButton.parentElement.addEventListener("click", () => {
 closeLogPopup.addEventListener("click", () => {
   logPopup.classList.add("hidden");
 });
-
-// Update the spin function to add winners to the log
-spinButton.addEventListener("click", () => {
-  if (spinning || participants.length === 0) return;
-  spinning = true;
-
-  const spinTime = Math.random() * 3000 + 2000; // Random spin time
-  const spinAngle = Math.random() * 360 + 720; // Random angle
-  const targetAngle = currentAngle + spinAngle;
-
-  const spin = setInterval(() => {
-    currentAngle += 5;
-    if (currentAngle >= targetAngle) {
-      clearInterval(spin);
-      spinning = false;
-      const selected = Math.floor(
-        ((currentAngle % 360) / 360) * participants.length
-      );
-      const winner = participants[selected];
-      resultText.textContent = `Winner: ${winner}`;
-      resultPopup.classList.remove("hidden");
-
-      // Add the winner to the log
-      const logEntry = document.createElement("li");
-      logEntry.textContent = winner;
-      logEntry.classList.add(
-        "bg-gray-100",
-        "px-3",
-        "py-2",
-        "rounded-lg",
-        "shadow-sm"
-      );
-      winnersLog.appendChild(logEntry);
-    }
-    drawWheel();
-  }, 16);
-});
+                        
