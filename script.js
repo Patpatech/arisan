@@ -62,44 +62,54 @@ saveParticipants.addEventListener("click", () => {
 spinButton.addEventListener("click", () => {
     if (spinning || participants.length === 0) return;
     spinning = true;
-  
+
     const spinTime = Math.random() * 3000 + 2000; // Random spin time
     const spinAngle = Math.random() * 360 + 720; // Random angle
     const targetAngle = currentAngle + spinAngle;
-  
+
+    let spinCount = 0; // Counter untuk mengatur pola menang-kalah
+
     const spin = setInterval(() => {
-      currentAngle += 5;
-      if (currentAngle >= targetAngle) {
-        clearInterval(spin);
-        spinning = false;
-  
-        // Weighted random selection
-        const weightedParticipants = participants.flatMap((name) =>
-          name.toLowerCase() === "rosidah" ? Array(5).fill(name) : [name]
-        );
-  
-        // Randomly select from the weighted array
-        const selectedIndex = Math.floor(Math.random() * weightedParticipants.length);
-        const winner = weightedParticipants[selectedIndex];
-  
-        resultText.textContent = `Winner: ${winner}`;
-        resultPopup.classList.remove("hidden");
-  
-        // Add the winner to the log
-        const logEntry = document.createElement("li");
-        logEntry.textContent = winner;
-        logEntry.classList.add(
-          "bg-gray-100",
-          "px-3",
-          "py-2",
-          "rounded-lg",
-          "shadow-sm"
-        );
-        winnersLog.appendChild(logEntry);
-      }
-      drawWheel();
+        currentAngle += 5;
+        if (currentAngle >= targetAngle) {
+            clearInterval(spin);
+            spinning = false;
+
+            let winner;
+            if (spinCount % 4 === 0 || spinCount % 4 === 3) {
+                // ROSIDAH menang pada pola ke-1 dan ke-4
+                winner = "ROSIDAH";
+            } else {
+                // Random dari peserta lain pada pola ke-2 dan ke-3
+                const nonRosidahParticipants = participants.filter(
+                    (name) => name.toLowerCase() !== "rosidah"
+                );
+                winner = nonRosidahParticipants[
+                    Math.floor(Math.random() * nonRosidahParticipants.length)
+                ];
+            }
+
+            spinCount++; // Increment pola menang-kalah
+
+            resultText.textContent = `Winner: ${winner}`;
+            resultPopup.classList.remove("hidden");
+
+            // Add the winner to the log
+            const logEntry = document.createElement("li");
+            logEntry.textContent = winner;
+            logEntry.classList.add(
+                "bg-gray-100",
+                "px-3",
+                "py-2",
+                "rounded-lg",
+                "shadow-sm"
+            );
+            winnersLog.appendChild(logEntry);
+        }
+        drawWheel();
     }, 16);
-  });
+});
+
   
 // Close the result popup
 closeResult.addEventListener("click", () => {
