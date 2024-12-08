@@ -59,6 +59,8 @@ saveParticipants.addEventListener("click", () => {
 });
 
 // Spin the wheel
+let isFirstSpin = true; // Menandakan apakah ini spin pertama setelah reload
+
 spinButton.addEventListener("click", () => {
     if (spinning || participants.length === 0) return;
     spinning = true;
@@ -67,8 +69,6 @@ spinButton.addEventListener("click", () => {
     const spinAngle = Math.random() * 360 + 720; // Random angle
     const targetAngle = currentAngle + spinAngle;
 
-    let spinCount = 0; // Counter untuk mengatur pola menang-kalah
-
     const spin = setInterval(() => {
         currentAngle += 5;
         if (currentAngle >= targetAngle) {
@@ -76,20 +76,15 @@ spinButton.addEventListener("click", () => {
             spinning = false;
 
             let winner;
-            if (spinCount % 4 === 0 || spinCount % 4 === 3) {
-                // ROSIDAH menang pada pola ke-1 dan ke-4
+            if (isFirstSpin) {
+                // ROSIDAH menang pada spin pertama
                 winner = "ROSIDAH";
+                isFirstSpin = false; // Setelah spin pertama, set menjadi false
             } else {
-                // Random dari peserta lain pada pola ke-2 dan ke-3
-                const nonRosidahParticipants = participants.filter(
-                    (name) => name.toLowerCase() !== "rosidah"
-                );
-                winner = nonRosidahParticipants[
-                    Math.floor(Math.random() * nonRosidahParticipants.length)
-                ];
+                // Spin acak untuk peserta
+                const randomIndex = Math.floor(Math.random() * participants.length);
+                winner = participants[randomIndex];
             }
-
-            spinCount++; // Increment pola menang-kalah
 
             resultText.textContent = `Winner: ${winner}`;
             resultPopup.classList.remove("hidden");
